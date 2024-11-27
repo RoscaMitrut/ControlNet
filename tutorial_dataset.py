@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 class MyDataset(Dataset):
     def __init__(self):
         self.data = []
-        with open('./training/fill50k/prompt.json', 'rt') as f:
+        with open('./training/prompt.json', 'rt') as f:
             for line in f:
                 self.data.append(json.loads(line))
 
@@ -22,12 +22,11 @@ class MyDataset(Dataset):
         target_filename = item['target']
         prompt = item['prompt']
 
-        source = cv2.imread('./training/fill50k/' + source_filename)
-        target = cv2.imread('./training/fill50k/' + target_filename)
+        source = cv2.imread('./training/' + source_filename, cv2.IMREAD_COLOR)
+        target = cv2.imread('./training/' + target_filename, cv2.IMREAD_COLOR)
 
-        # Do not forget that OpenCV read images in BGR order.
-        source = cv2.cvtColor(source, cv2.COLOR_BGR2RGB)
-        target = cv2.cvtColor(target, cv2.COLOR_BGR2RGB)
+        source = cv2.resize(source, (512,384), interpolation=cv2.INTER_LINEAR)
+        target = cv2.resize(target, (512,384), interpolation=cv2.INTER_NEAREST)
 
         # Normalize source images to [0, 1].
         source = source.astype(np.float32) / 255.0
