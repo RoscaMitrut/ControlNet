@@ -17,8 +17,8 @@ from cldm.ddim_hacked import DDIMSampler
 
 apply_uniformer = UniformerDetector()
 
-model = create_model('./models/cldm_v15.yaml').cpu()
-model.load_state_dict(load_state_dict('./models/control_sd15_seg.pth', location='cuda'))
+model = create_model('./models/cldm_v21.yaml').cpu()
+model.load_state_dict(load_state_dict('./checkpoints/model2-epoch=04.ckpt', location='cuda'))
 model = model.cuda()
 ddim_sampler = DDIMSampler(model)
 
@@ -94,4 +94,4 @@ with block:
     run_button.click(fn=process, inputs=ips, outputs=[result_gallery])
 
 
-block.launch(server_name='0.0.0.0')
+block.launch(server_name='0.0.0.0', share=True)
