@@ -2,15 +2,16 @@ from share import *
 
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
+from pytorch_lightning.callbacks import ModelCheckpoint
 from tutorial_dataset import MyDataset
 from cldm.logger import ImageLogger
 from cldm.model import create_model, load_state_dict
-
+from pytorch_lightning.loggers import TensorBoardLogger
 
 # Configs
-resume_path = './models/control_sd15_ini.ckpt'
-batch_size = 4
-logger_freq = 300
+resume_path = './models/control_sd15_seg.pth'
+batch_size = 3
+logger_freq = 500
 learning_rate = 1e-5
 sd_locked = True
 only_mid_control = False
@@ -26,10 +27,20 @@ model.only_mid_control = only_mid_control
 
 # Misc
 dataset = MyDataset()
-dataloader = DataLoader(dataset, num_workers=0, batch_size=batch_size, shuffle=True)
+dataloader = DataLoader(dataset, num_workers=12, batch_size=batch_size, shuffle=True)
 logger = ImageLogger(batch_frequency=logger_freq)
-trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
+logger2 = TensorBoardLogger("tb_logs", name="my_model")
 
+# Save the last model
+last_model_checkpoint = ModelCheckpoint(
+    dirpath='./checkpoints/',
+    filename='last-model',
+    save_top_k=1,  # Always keep only the last model
+    save_last=True,  # Ensure the last model is saved
+    save_weights_only=True
+)
+
+trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger,last_model_checkpoint], max_epochs=2)
 
 # Train!
 trainer.fit(model, dataloader)
