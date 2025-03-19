@@ -1,14 +1,16 @@
 import sys
 import os
 
-assert len(sys.argv) == 3, 'Args are wrong.'
+assert len(sys.argv) == 4, 'Args are wrong. There should be 3 args: input_path, output_path, input_channels.'
 
 input_path = sys.argv[1]
 output_path = sys.argv[2]
+input_channels = sys.argv[3]
 
 assert os.path.exists(input_path), 'Input model does not exist.'
 assert not os.path.exists(output_path), 'Output filename already exists.'
 assert os.path.exists(os.path.dirname(output_path)), 'Output path is not valid.'
+assert input_channels in ['1', '3', '4'], 'Input channels must be 1, 3 or 4.'
 
 import torch
 from share import *
@@ -24,7 +26,7 @@ def get_node_name(name, parent_name):
     return True, name[len(parent_name):]
 
 
-model = create_model(config_path='./models/cldm_v21.yaml')
+model = create_model(config_path=f'./models/cldm_v21_{input_channels}.yaml')
 
 pretrained_weights = torch.load(input_path)
 if 'state_dict' in pretrained_weights:
