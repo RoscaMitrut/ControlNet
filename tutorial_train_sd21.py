@@ -8,8 +8,11 @@ from cldm.logger import ImageLogger
 from cldm.model import create_model, load_state_dict
 from pytorch_lightning.loggers import TensorBoardLogger
 
-# Choose between 1,3,4
-input_channels = "3"
+assert len(sys.argv) == 2, 'Args are wrong. There should be 1 arg: input_channels.'
+
+input_path = sys.argv[1]
+assert input_channels in ['1', '3', '4'], 'Input channels must be 1, 3 or 4.'
+
 
 # Configs
 resume_path = './ControlNet/models/control_sd21_ini.ckpt'
