@@ -12,7 +12,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 input_channels = "3"
 
 # Configs
-resume_path = './models/control_sd21_ini.ckpt'
+resume_path = './ControlNet/models/control_sd21_ini.ckpt'
 batch_size = 4
 logger_freq = 125
 learning_rate = 1e-5
@@ -20,7 +20,7 @@ sd_locked = True
 only_mid_control = False
 
 # First use cpu to load models. Pytorch Lightning will automatically move it to GPUs.
-model = create_model(f'./models/cldm_v21_{input_channels}.yaml').cpu()
+model = create_model(f'./ControlNet/models/cldm_v21_{input_channels}.yaml').cpu()
 model.load_state_dict(load_state_dict(resume_path, location='cpu'))
 model.learning_rate = learning_rate
 model.sd_locked = sd_locked
