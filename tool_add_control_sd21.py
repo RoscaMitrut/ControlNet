@@ -28,7 +28,7 @@ def get_node_name(name, parent_name):
 
 model = create_model(config_path=f'./ControlNet/models/cldm_v21_{input_channels}.yaml')
 
-pretrained_weights = torch.load(input_path)
+pretrained_weights = torch.load(input_path,weights_only=False)
 if 'state_dict' in pretrained_weights:
     pretrained_weights = pretrained_weights['state_dict']
 
