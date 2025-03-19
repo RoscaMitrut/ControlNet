@@ -8,9 +8,11 @@ from cldm.logger import ImageLogger
 from cldm.model import create_model, load_state_dict
 from pytorch_lightning.loggers import TensorBoardLogger
 
+import sys
+
 assert len(sys.argv) == 2, 'Args are wrong. There should be 1 arg: input_channels.'
 
-input_path = sys.argv[1]
+input_channels = sys.argv[1]
 assert input_channels in ['1', '3', '4'], 'Input channels must be 1, 3 or 4.'
 
 
