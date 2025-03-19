@@ -2,11 +2,15 @@ from share import *
 
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
-from pytorch_lightning.callbacks import ModelCheckpoint
 from tutorial_dataset import MyDataset_1,MyDataset_3,MyDataset_4
 from cldm.logger import ImageLogger
 from cldm.model import create_model, load_state_dict
+
+'''
+TODO
+from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
+'''
 
 import sys
 
@@ -39,11 +43,12 @@ elif input_channels == "3":
 elif input_channels == "4":
     dataset = MyDataset_4()
 
-dataloader = DataLoader(dataset, num_workers=12, batch_size=batch_size, shuffle=True)
+dataloader = DataLoader(dataset, num_workers=0, batch_size=batch_size, shuffle=True)
 logger = ImageLogger(batch_frequency=logger_freq)
-logger2 = TensorBoardLogger(f"tb_logs_{input_channels}", name="my_model")
 
-# Save the last model
+'''
+TODO
+logger2 = TensorBoardLogger(f"tb_logs_{input_channels}", name="my_model")
 last_model_checkpoint = ModelCheckpoint(
     dirpath=f'./checkpoints_{input_channels}/',
     filename='last-model',
@@ -51,8 +56,8 @@ last_model_checkpoint = ModelCheckpoint(
     save_last=True,  # Ensure the last model is saved
     save_weights_only=True
 )
-
 trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger,last_model_checkpoint], max_epochs=1)
-
+'''
+trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
 # Train!
 trainer.fit(model, dataloader)
