@@ -1,3 +1,4 @@
+name: control
 channels:
   - pytorch
   - defaults
