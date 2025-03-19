@@ -58,7 +58,7 @@ last_model_checkpoint = ModelCheckpoint(
 )
 trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger,last_model_checkpoint], max_epochs=1)
 '''
-#trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
-trainer = pl.Trainer(accelerator="gpu", devices=1, precision="32", callbacks=[logger])
+trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
+#trainer = pl.Trainer(accelerator="gpu", devices=1, precision="32", callbacks=[logger])
 # Train!
 trainer.fit(model, dataloader)
