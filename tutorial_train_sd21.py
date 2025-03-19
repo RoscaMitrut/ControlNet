@@ -22,7 +22,7 @@ assert input_channels in ['1', '3', '4'], 'Input channels must be 1, 3 or 4.'
 
 # Configs
 resume_path = './ControlNet/models/control_sd21_ini.ckpt'
-batch_size = 4
+batch_size = 1
 logger_freq = 125
 learning_rate = 1e-5
 sd_locked = True
