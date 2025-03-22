@@ -12,23 +12,6 @@ from pytorch_lightning.loggers import TensorBoardLogger
 import sys
 import os
 
-class CustomCheckpoint(ModelCheckpoint):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.checkpoint_path = None
-    
-    def on_train_epoch_end(self, trainer, pl_module):
-        if self.checkpoint_path is not None and os.path.exists(self.checkpoint_path):
-            try:
-                os.remove(self.checkpoint_path)
-                print(f"Deleted previous checkpoint: {self.checkpoint_path}")
-            except Exception as e:
-                print(f"Error deleting previous checkpoint: {e}")
-        
-        super().on_validation_end(trainer, pl_module)
-        
-        if hasattr(self, "best_model_path") and self.best_model_path:
-            self.checkpoint_path = self.best_model_path
 
 assert len(sys.argv) == 2, 'Args are wrong. There should be 1 arg: input_channels.'
 
@@ -65,7 +48,18 @@ logger = ImageLogger(batch_frequency=logger_freq)
 #
 logger2 = TensorBoardLogger(f"tb_logs_{input_channels}", name="my_model")
 
-trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger], max_epochs=2, default_root_dir=f"./checkpoints/")
+last_model_checkpoint = ModelCheckpoint(
+    dirpath=f'./checkpoints/',
+    save_weights_only=True,
+    save_top_k=1,
+    every_n_epochs=1,
+    save_last=True
+    )
+
+if os.path.exists("./ControlNet/models/control_sd21_ini.ckpt"):
+    os.remove("./ControlNet/models/control_sd21_ini.ckpt")
+
+trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger,last_model_checkpoint], max_epochs=2)
 #
 
 #trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
