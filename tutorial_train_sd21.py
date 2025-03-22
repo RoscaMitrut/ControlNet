@@ -17,7 +17,7 @@ class CustomCheckpoint(ModelCheckpoint):
         super().__init__(*args, **kwargs)
         self.checkpoint_path = None
     
-    def on_validation_end(self, trainer, pl_module):
+    def on_train_epoch_end(self, trainer, pl_module):
         if self.checkpoint_path is not None and os.path.exists(self.checkpoint_path):
             try:
                 os.remove(self.checkpoint_path)
@@ -65,15 +65,7 @@ logger = ImageLogger(batch_frequency=logger_freq)
 #
 logger2 = TensorBoardLogger(f"tb_logs_{input_channels}", name="my_model")
 
-last_model_checkpoint = CustomCheckpoint(
-    dirpath=f'./checkpoints/',
-    save_weights_only=True,
-    save_top_k=1,
-    every_n_epochs=1,
-    save_last=False
-    )
-
-trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger,last_model_checkpoint], max_epochs=2)
+trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger], max_epochs=2, default_root_dir=f"./checkpoints/")
 #
 
 #trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
