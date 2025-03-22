@@ -52,8 +52,8 @@ last_model_checkpoint = ModelCheckpoint(
     dirpath=f'./checkpoints/',
     save_weights_only=True,
     save_top_k=1,
-    every_n_epochs=1,
-    save_last=True
+    monitor="global_step",
+    mode="max",
     )
 
 if os.path.exists("./ControlNet/models/control_sd21_ini.ckpt"):
