@@ -47,7 +47,7 @@ logger = ImageLogger(batch_frequency=logger_freq)
 logger2 = TensorBoardLogger(f"tb_logs_{input_channels}", name="my_model")
 
 last_model_checkpoint = ModelCheckpoint(
-    dirpath=f'./ControlNet/checkpoints/',
+    dirpath=f'./checkpoints/',
     filename="last",
     save_top_k=1,  # Always keep only the last model
     save_last=True,  # Ensure the last model is saved
