@@ -51,8 +51,11 @@ logger2 = TensorBoardLogger(f"tb_logs_{input_channels}", name="my_model")
 last_model_checkpoint = ModelCheckpoint(
     dirpath=f'./checkpoints/',
     save_weights_only=True,
-    save_last=True
+    save_top_k=1,
+    every_n_epochs=1,
+    save_last=False
     )
+
 trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger,last_model_checkpoint], max_epochs=2)
 #
 
