@@ -67,7 +67,7 @@ class MyDataset_4(Dataset):
         self.data = []
         with open('./training/prompt.json', 'rt') as f:
             for i,line in enumerate(f):
-                if i>=20:
+                if i>=10:
                     break
                 self.data.append(json.loads(line))
 

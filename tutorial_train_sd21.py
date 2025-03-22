@@ -10,6 +10,23 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 
 import sys
+import os
+
+class CustomCheckpoint(ModelCheckpoint):
+    def on_save_checkpoint(self, trainer, pl_module, checkpoint):
+        # Remove old checkpoint first (limited disk space)
+        epochs_trained = trainer.current_epoch
+        new_filename = f"last_{epochs_trained}epochs.ckpt"
+        new_path = os.path.join(self.dirpath, new_filename)
+
+        if os.path.exists(new_path):
+            os.remove(new_path)
+            
+        super().on_save_checkpoint(trainer, pl_module, checkpoint)
+        
+        if os.path.exists(self.last_model_path):
+            os.rename(self.last_model_path, new_path)
+            self.last_model_path = new_path  # Update internal reference
 
 assert len(sys.argv) == 2, 'Args are wrong. There should be 1 arg: input_channels.'
 
@@ -46,7 +63,7 @@ logger = ImageLogger(batch_frequency=logger_freq)
 #
 logger2 = TensorBoardLogger(f"tb_logs_{input_channels}", name="my_model")
 
-last_model_checkpoint = ModelCheckpoint(
+last_model_checkpoint = CustomCheckpoint(
     dirpath=f'./checkpoints/',
     filename="last",
     save_top_k=1,  # Always keep only the last model
