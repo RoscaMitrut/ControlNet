@@ -13,16 +13,22 @@ import sys
 import os
 
 
-assert len(sys.argv) == 2, 'Args are wrong. There should be 1 arg: input_channels.'
+assert len(sys.argv) == 4, 'Args are wrong. There should be 3 args: input_channels, batch size, epochs.'
 
 input_channels = sys.argv[1]
 assert input_channels in ['1', '3', '4'], 'Input channels must be 1, 3 or 4.'
 
+batch_size = sys.argv[2]
+batch_size = int(batch_size)
+assert batch_size > 0, 'Batch size must be positive.'
+
+epochs = sys.argv[3]
+epochs = int(epochs)
+assert epochs > 0, 'Epochs must be positive.'
 
 # Configs
 resume_path = './ControlNet/models/control_sd21_ini.ckpt'
-batch_size = 1
-logger_freq = 1000
+logger_freq = int(1000/batch_size)
 learning_rate = 1e-5
 sd_locked = True
 only_mid_control = False
@@ -59,7 +65,7 @@ last_model_checkpoint = ModelCheckpoint(
 if os.path.exists("./ControlNet/models/control_sd21_ini.ckpt"):
     os.remove("./ControlNet/models/control_sd21_ini.ckpt")
 
-trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger,last_model_checkpoint], max_epochs=2)
+trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger,last_model_checkpoint], max_epochs=epochs)
 #
 
 #trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
