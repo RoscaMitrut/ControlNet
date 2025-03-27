@@ -56,7 +56,7 @@ class MyDataset_1(Dataset):
         source = cv2.imread('./training/' + source_filename, cv2.IMREAD_GRAYSCALE)
         target = cv2.imread('./training/' + target_filename)
 
-        source = cv2.cvtColor(source, cv2.COLOR_BGR2RGB)
+        target = cv2.cvtColor(target, cv2.COLOR_BGR2RGB)
 
         # Normalize source images to [0, 1].
         source = source.astype(np.float32) / 255.0
