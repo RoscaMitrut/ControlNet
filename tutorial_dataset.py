@@ -80,7 +80,7 @@ class MyDataset_4(Dataset):
         target_filename = item['target']
         prompt = item['prompt']
 
-        source = cv2.imread('./training/' + source_filename, cv2.COLOR_BGR2RGB)
+        source = cv2.imread('./training/' + source_filename, cv2.IMREAD_COLOR)
         source2 =cv2.imread('./training/' + source2_filename,cv2.IMREAD_GRAYSCALE)
         target = cv2.imread('./training/' + target_filename, cv2.IMREAD_COLOR)
 
