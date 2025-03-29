@@ -66,7 +66,7 @@ steps_model_checkpoint = ModelCheckpoint(
     save_top_k=1,
     monitor="global_step",
     mode="max",
-    every_n_train_steps=20000,
+    every_n_train_steps=69,
 )
 epochs_model_checkpoint = ModelCheckpoint(
     dirpath='./checkpoints/',
