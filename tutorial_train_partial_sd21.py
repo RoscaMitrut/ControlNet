@@ -73,7 +73,7 @@ epochs_model_checkpoint = ModelCheckpoint(
     save_weights_only=True,
     save_top_k=1,
     monitor="epoch",
-    mode="max",
+    mode="min",
     every_n_epochs=5,
 )
 
