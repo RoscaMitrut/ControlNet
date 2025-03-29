@@ -60,20 +60,12 @@ logger2 = TensorBoardLogger(f"tb_logs_{input_channels}", name="my_model")
 #     monitor="global_step",
 #     mode="max",
 #     )
-steps_model_checkpoint = ModelCheckpoint(
-    dirpath='./checkpoints/',
-    save_weights_only=True,
-    save_top_k=1,
-    monitor="global_step",
-    mode="max",
-    every_n_train_steps=69,
-)
 epochs_model_checkpoint = ModelCheckpoint(
     dirpath='./checkpoints/',
     save_weights_only=True,
     save_top_k=1,
     monitor="epoch",
-    mode="min",
+    mode="max",
     every_n_epochs=5,
 )
 
@@ -81,7 +73,7 @@ epochs_model_checkpoint = ModelCheckpoint(
 if os.path.exists("./ControlNet/models/control_sd21_ini.ckpt"):
     os.remove("./ControlNet/models/control_sd21_ini.ckpt")
 
-trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger,steps_model_checkpoint,epochs_model_checkpoint], max_epochs=epochs)
+trainer = pl.Trainer(gpus=1, precision=32, logger=logger2, callbacks=[logger,epochs_model_checkpoint], max_epochs=epochs)
 #
 
 #trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
