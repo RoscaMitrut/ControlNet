@@ -126,7 +126,7 @@ def read_sample_paths(file_path, n=100):
                 print(f"Error decoding line {i+1}: {e}")
     return filenames
 
-samples = read_sample_paths(prompt_path, channels)
+samples = read_sample_paths(prompt_path, nr_of_samples)
 
 if channels == '1':
     samples_folder = 'generated_depths'
