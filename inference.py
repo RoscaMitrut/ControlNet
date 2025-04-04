@@ -16,7 +16,7 @@ import json
 import sys
 import os
 
-assert len(sys.argv) == 5, 'Args are wrong. There should be 3 args: channels, prompt_path, model_path, nr_of_samples.'
+assert len(sys.argv) == 5, 'Args are wrong. There should be 4 args: channels, prompt_path, model_path, nr_of_samples.'
 
 channels = sys.argv[1]
 assert channels in ['1', '3', '4'], 'Input channels must be 1, 3 or 4.'
