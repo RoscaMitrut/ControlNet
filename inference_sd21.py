@@ -8,7 +8,7 @@ import torch
 import random
 from pytorch_lightning import seed_everything
 from annotator.util import resize_image, HWC3
-from annotator.uniformer import UniformerDetector
+#from annotator.uniformer import UniformerDetector
 from cldm.model import create_model, load_state_dict
 from cldm.ddim_hacked import DDIMSampler
 from PIL import Image
@@ -30,7 +30,7 @@ assert os.path.exists(model_path), f'Model path {model_path} does not exist.'
 nr_of_samples = int(sys.argv[4])
 assert nr_of_samples > 0, f'Number of samples {nr_of_samples} must be greater than 0.'
 
-apply_uniformer = UniformerDetector()
+#apply_uniformer = UniformerDetector()
 model = create_model(f'./ControlNet/models/cldm_v21_{channels}.yaml').cpu()
 model.load_state_dict(load_state_dict(model_path, location='cuda'))
 model = model.cuda()
