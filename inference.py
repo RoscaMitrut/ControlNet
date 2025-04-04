@@ -6,29 +6,46 @@ import einops
 import numpy as np
 import torch
 import random
-from random import randint
 from pytorch_lightning import seed_everything
 from annotator.util import resize_image, HWC3
 from annotator.uniformer import UniformerDetector
 from cldm.model import create_model, load_state_dict
 from cldm.ddim_hacked import DDIMSampler
 from PIL import Image
+import json
+import sys
+import os
+
+assert len(sys.argv) == 5, 'Args are wrong. There should be 3 args: channels, prompt_path, model_path, nr_of_samples.'
+
+channels = sys.argv[1]
+assert channels in ['1', '3', '4'], 'Input channels must be 1, 3 or 4.'
+
+prompt_path = sys.argv[2]
+assert os.path.exists(prompt_path), f'Prompt path {prompt_path} does not exist.'
+
+model_path = sys.argv[3]
+assert os.path.exists(model_path), f'Model path {model_path} does not exist.'
+
+nr_of_samples = int(sys.argv[4])
+assert nr_of_samples > 0, f'Number of samples {nr_of_samples} must be greater than 0.'
 
 apply_uniformer = UniformerDetector()
-
-model = create_model('/teamspace/studios/this_studio/ControlNet/models/cldm_v21.yaml').cpu()
-model.load_state_dict(load_state_dict('/teamspace/studios/this_studio/ControlNet/checkpoints/model2-epoch=04.ckpt', location='cuda'))
+model = create_model(f'./ControlNet/models/cldm_v21_{channels}.yaml').cpu()
+model.load_state_dict(load_state_dict(model_path, location='cuda'))
 model = model.cuda()
 
 def process(input_image, prompt, a_prompt='best quality, extremely detailed', n_prompt='lowres, cropped, worst quality, low quality', num_samples=4, image_resolution=512, detect_resolution=512, ddim_steps=20, guess_mode=False, strength=1.0, scale=9.0, seed=-1, eta=0.0):
     with torch.no_grad():
-        input_image = HWC3(input_image)
-        detected_map = apply_uniformer(resize_image(input_image, detect_resolution))
+        
+        if channels != '4':
+            input_image = HWC3(input_image)
+            
+        #M detected_map = apply_uniformer(resize_image(input_image, detect_resolution))
         img = resize_image(input_image, image_resolution)
         H, W, C = img.shape
-        ## DELETE APPLY_UNIFORMER
-        detected_map = cv2.resize(detected_map, (W, H), interpolation=cv2.INTER_NEAREST)
-
+        #M detected_map = cv2.resize(detected_map, (W, H), interpolation=cv2.INTER_NEAREST)
+        detected_map = img
         control = torch.from_numpy(detected_map.copy()).float().cuda() / 255.0
         control = torch.stack([control for _ in range(num_samples)], dim=0)
         control = einops.rearrange(control, 'b h w c -> b c h w').clone()
@@ -69,13 +86,21 @@ def save_array_as_image(array, output_path):
         if not isinstance(array, np.ndarray):
             raise ValueError("Input must be a NumPy array.")
         if array.ndim not in (2, 3):
-            raise ValueError("Array must be 2D (grayscale) or 3D (RGB).")
-        
+            raise ValueError("Array must be 2D (grayscale) or 3D (RGB/RGBA).")
+
         if array.dtype != np.uint8:
             array = np.clip(array, 0, 255).astype(np.uint8)
 
-        image = Image.fromarray(array)
+        if array.ndim == 2:
+            mode = 'L'  # Grayscale
+        elif array.shape[2] == 3:
+            mode = 'RGB'
+        elif array.shape[2] == 4:
+            mode = 'RGBA'
+        else:
+            raise ValueError("3D array must have 3 (RGB) or 4 (RGBA) channels.")
 
+        image = Image.fromarray(array, mode)
         image.save(output_path)
         print(f"Image saved successfully at {output_path}")
     except Exception as e:
@@ -83,44 +108,36 @@ def save_array_as_image(array, output_path):
 
 def load_image_with_numpy(image_path):
     img = Image.open(image_path)
-
     img_array = np.array(img)
-    print(image_path)
     return img_array
 
-def read_text_file(file_path, line_number):
-    try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            lines = file.readlines()
+def read_sample_paths(file_path, n=100):
+    filenames = []
+    with open(file_path, 'r') as file:
+        for i, line in enumerate(file):
+            if i >= n:
+                break
+            try:
+                data = json.loads(line.strip())
+                source_path = data.get("source", "")  # Get the "source" field
+                filename = os.path.basename(source_path)  # Extract only the filename
+                filenames.append(filename)
+            except json.JSONDecodeError as e:
+                print(f"Error decoding line {i+1}: {e}")
+    return filenames
 
-            if line_number < 0 or line_number > len(lines):
-                raise ValueError(f"Line number {line_number} is out of range. The file has {len(lines)} lines.")
-            
-            line_content = lines[line_number].strip()
+samples = read_sample_paths(prompt_path, channels)
 
-            content_dict = json.loads(line_content)
-            print(content_dict["prompt"])
-            return content_dict["prompt"]
-    except :
-        raise Exception("File error")
+if channels == '1':
+    samples_folder = 'generated_depths'
+elif channels == '3':
+    samples_folder = 'masks_out'
+elif channels == '4':
+    samples_folder = 'rgba_masks'
 
-def write_string_to_file(file_path, content):
-    try:
-        with open(file_path, 'w') as file:
-            file.write(content)
-    except:
-        raise Exception()
-
-def init_prompt(line_nr=randint(0,500)):
-    img = load_image_with_numpy(f"/teamspace/studios/this_studio/ControlNet/training/fill50k/source/{line_nr}.png")
-    prompt = read_text_file("/teamspace/studios/this_studio/ControlNet/training/fill50k/prompt.json",line_nr)
-    write_string_to_file("/teamspace/studios/this_studio/ControlNet/new_predict/prompt.txt",prompt)
-    save_array_as_image(img,"/teamspace/studios/this_studio/ControlNet/new_predict/input_image.png")
-    return img,prompt
-
-img,prompt = init_prompt()
-
-ceva = process(img,prompt)
-
-for i,el in enumerate(ceva):
-    save_array_as_image(el,f"/teamspace/studios/this_studio/ControlNet/predict/{i}.png")
+for i,sample in enumerate(samples):
+    img = load_image_with_numpy(f"./testing/{samples_folder}/{sample}")
+    save_array_as_image(img,f"./output/input_{i}.png")
+    ceva = process(img)
+    for j,el in enumerate(ceva):
+        save_array_as_image(el,f"./output/predicted_{i}_{j}.png")
