@@ -138,6 +138,6 @@ elif channels == '4':
 for i,sample in enumerate(samples):
     img = load_image_with_numpy(f"./testing/{samples_folder}/{sample}")
     save_array_as_image(img,f"./output/input_{i}.png")
-    ceva = process(img)
+    ceva = process(img,"")
     for j,el in enumerate(ceva):
         save_array_as_image(el,f"./output/predicted_{i}_{j}.png")
