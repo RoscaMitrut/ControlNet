@@ -35,7 +35,7 @@ model = create_model(f'./ControlNet/models/cldm_v21_{channels}.yaml').cpu()
 model.load_state_dict(load_state_dict(model_path, location='cuda'))
 model = model.cuda()
 
-def process(input_image, prompt, a_prompt='best quality, extremely detailed', n_prompt='lowres, cropped, worst quality, low quality', num_samples=5, image_resolution=512, detect_resolution=512, ddim_steps=20, guess_mode=False, strength=1.0, scale=9.0, seed=-1, eta=0.0):
+def process(input_image, prompt, a_prompt='best quality, extremely detailed', n_prompt='lowres, cropped, worst quality, low quality', num_samples=5, image_resolution=512, detect_resolution=512, ddim_steps=50, guess_mode=False, strength=1.2, scale=7.0, seed=-1, eta=0.0):
     with torch.no_grad():
         
         if channels != '4':
