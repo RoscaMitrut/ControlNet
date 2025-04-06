@@ -15,6 +15,7 @@ from PIL import Image
 import json
 import sys
 import os
+import itertools
 
 assert len(sys.argv) == 5, 'Args are wrong. There should be 4 args: channels, prompt_path, model_path, nr_of_samples.'
 
@@ -35,7 +36,7 @@ model = create_model(f'./ControlNet/models/cldm_v21_{channels}.yaml').cpu()
 model.load_state_dict(load_state_dict(model_path, location='cuda'))
 model = model.cuda()
 
-def process(input_image, prompt, a_prompt='best quality, extremely detailed', n_prompt='lowres, cropped, worst quality, low quality', num_samples=5, image_resolution=512, detect_resolution=512, ddim_steps=20, guess_mode=False, strength=1.0, scale=9.0, seed=-1, eta=0.0):
+def process(input_image, prompt, a_prompt='best quality, extremely detailed', n_prompt='lowres, cropped, worst quality, low quality', num_samples=2, image_resolution=512, detect_resolution=512, ddim_steps=20, guess_mode=False, strength=1.0, scale=9.0, seed=-1, eta=0.0):
     with torch.no_grad():
         
         if channels != '4':
@@ -126,8 +127,6 @@ def read_sample_paths(file_path, n=100):
                 print(f"Error decoding line {i+1}: {e}")
     return filenames
 
-samples = read_sample_paths(prompt_path, nr_of_samples)
-
 if channels == '1':
     samples_folder = 'generated_depths'
 elif channels == '3':
@@ -135,9 +134,22 @@ elif channels == '3':
 elif channels == '4':
     samples_folder = 'rgba_masks'
 
-for i,sample in enumerate(samples):
-    img = load_image_with_numpy(f"./testing/{samples_folder}/{sample}")
-    save_array_as_image(img,f"./output/input_{i}.png")
-    ceva = process(img,"")
-    for j,el in enumerate(ceva):
-        save_array_as_image(el,f"./output/predicted_{i}_{j}.png")
+#samples = read_sample_paths(prompt_path, nr_of_samples)
+
+strength_values = [0.8, 1.2]
+scale_values = [0.1, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0]
+ddim_steps_values = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
+param_combinations = list(itertools.product(strength_values, scale_values, ddim_steps_values))
+
+img = load_image_with_numpy(f"./testing/{samples_folder}/munster_000117_000019.png")
+save_array_as_image(img, f"./output/input_img.png")
+
+for strength, scale, ddim in param_combinations:
+    result = process(img, prompt="", strength=strength, scale=scale, ddim_steps=ddim)
+    
+    if isinstance(result, list):
+        for idx, el in enumerate(result):
+            save_array_as_image(el, f"./output/predicted_s{strength}_sc{scale}_d{ddim}_{idx}.png")
+    else:
+        save_array_as_image(result, f"./output/predicted_s{strength}_sc{scale}_d{ddim}.png")
