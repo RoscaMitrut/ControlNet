@@ -96,14 +96,16 @@ def save_array_as_image(array, output_path):
 
         if array.ndim == 2:
             mode = 'L'  # Grayscale
-        elif array.shape[2] == 1:
-            mode = 'L' # Grayscale (single channel)
-        elif array.shape[2] == 3:
-            mode = 'RGB'
-        elif array.shape[2] == 4:
-            mode = 'RGBA'
+        elif array.ndim == 3:
+            if array.shape[2] == 1:
+                mode = 'L'
+                array = np.squeeze(array, axis=2)  # Remove the singleton channel
+            elif array.shape[2] == 3:
+                mode = 'RGB'
+            elif array.shape[2] == 4:
+                mode = 'RGBA'
         else:
-            raise ValueError("3D array must have 3 (RGB) or 4 (RGBA) channels.")
+            raise ValueError("3D array must have 1 (grayscale), 3 (RGB), or 4 (RGBA) channels.")
 
         image = Image.fromarray(array, mode)
         image.save(output_path)
