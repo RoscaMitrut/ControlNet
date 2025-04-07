@@ -96,22 +96,26 @@ def save_array_as_image(array, output_path):
 
         if array.ndim == 2:
             mode = 'L'  # Grayscale
+            array_to_save = array
         elif array.ndim == 3:
             if array.shape[2] == 1:
                 mode = 'L'
-                array = np.squeeze(array, axis=2)  # Remove the singleton channel
+                array_to_save = np.squeeze(array, axis=2)  # Don't modify original
             elif array.shape[2] == 3:
                 mode = 'RGB'
+                array_to_save = array
             elif array.shape[2] == 4:
                 mode = 'RGBA'
-        else:
-            raise ValueError("3D array must have 1 (grayscale), 3 (RGB), or 4 (RGBA) channels.")
+                array_to_save = array
+            else:
+                raise ValueError("3D array must have 1 (grayscale), 3 (RGB), or 4 (RGBA) channels.")
 
-        image = Image.fromarray(array, mode)
+        image = Image.fromarray(array_to_save, mode)
         image.save(output_path)
         print(f"Image saved successfully at {output_path}")
     except Exception as e:
         raise Exception(f"Error saving image: {e}")
+
 
 def load_image_with_numpy(image_path):
     img = Image.open(image_path)
