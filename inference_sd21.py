@@ -44,9 +44,10 @@ def process(input_image, prompt, a_prompt='best quality, extremely detailed', n_
         #M detected_map = apply_uniformer(resize_image(input_image, detect_resolution))
         img = resize_image(input_image, image_resolution)
         if channels == '1':
-            H,W = img.shape
-        else:
-            H, W, C = img.shape
+            if img.ndim == 2:
+                img = np.expand_dims(img, axis=-1)  # restore shape [H, W, 1]
+        
+        H, W, C = img.shape
         #M detected_map = cv2.resize(detected_map, (W, H), interpolation=cv2.INTER_NEAREST)
         detected_map = img
         control = torch.from_numpy(detected_map.copy()).float().cuda() / 255.0
