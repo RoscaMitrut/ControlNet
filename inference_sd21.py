@@ -114,6 +114,11 @@ def load_image_with_numpy(image_path):
     img_array = np.array(img)
     return img_array
 
+def load_grayscale_image_with_numpy(image_path):
+    img = Image.open(image_path).convert("L")  # Convert to grayscale (L mode)
+    img_array = np.expand_dims(np.array(img), axis=-1)  # Expand the dimensions to include the channel (depth of 1)
+    return img_array
+
 def read_sample_paths(file_path, n=100):
     filenames = []
     with open(file_path, 'r') as file:
@@ -139,7 +144,10 @@ elif channels == '4':
     samples_folder = 'rgba_masks'
 
 for i,sample in enumerate(samples):
-    img = load_image_with_numpy(f"./testing/{samples_folder}/{sample}")
+    if channels == '1':
+        img = load_grayscale_image_with_numpy(f"./testing/{samples_folder}/{sample}")
+    else:
+        img = load_image_with_numpy(f"./testing/{samples_folder}/{sample}")
     save_array_as_image(img,f"./output/input_{i}.png")
     ceva = process(img,"")
     for j,el in enumerate(ceva):
