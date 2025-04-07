@@ -96,6 +96,8 @@ def save_array_as_image(array, output_path):
 
         if array.ndim == 2:
             mode = 'L'  # Grayscale
+        elif array.shape[2] == 1:
+            mode = 'L' # Grayscale (single channel)
         elif array.shape[2] == 3:
             mode = 'RGB'
         elif array.shape[2] == 4:
